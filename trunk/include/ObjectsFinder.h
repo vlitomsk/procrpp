@@ -18,6 +18,7 @@ class ObjectsFinder {
 		 */
         ObjectsFinder(int cam, double target_realrad);
         ObjectsFinder(int cam, double realrad, double dist_coef);
+        ~ObjectsFinder();
 
         /* Обновить данные о мишени и луче */
         void refresh();

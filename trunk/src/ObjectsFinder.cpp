@@ -23,6 +23,10 @@ ObjectsFinder::ObjectsFinder(int cam, double realrad, double dist_coef) {
     init(cam, realrad, dist_coef);
 }
 
+ObjectsFinder::~ObjectsFinder() {
+	cvReleaseCapture(&capture);
+}
+
 #define max(a, b) ((a) >= (b) ? (a) : (b))
 
 void ObjectsFinder::refresh() {
