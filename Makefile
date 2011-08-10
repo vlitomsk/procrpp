@@ -18,6 +18,9 @@ compile:
 link:
 	$(LINKER) ./lib/*.o $(LINKER_OPTIONS) -o $(BINARY_NAME)
 
+run: all
+	$(BINARY_NAME)
+
 clean:
 	rm ./lib/*.o -f
 	rm $(BINARY_NAME) -f
