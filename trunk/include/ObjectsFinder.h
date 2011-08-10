@@ -3,6 +3,7 @@
 
 #include <cv.h>
 #include <highgui.h>
+#include "types.h"
 
 struct IntPoint {
     int x, y;
@@ -38,18 +39,28 @@ class ObjectsFinder {
         /* Получить координаты луча в камере, пикс */
         IntPoint getLuchCenter();
 
+        /* Калибровать камеру на поиск мишени и луча заданных цветов */
+        void calibrate(int targetr, int targetg, int targetb, int maxdelta);
+
     private:
         static const double tDefaultDistCoeff = 42; // дефолтный tDistanceCoeff
         double tDistanceCoeff; // отношение реальных размеров к размерам на камерe    
         static const int g_thresh = 100; // порог обнаружения контуров
-        static const int GaussBlurSize = 51; // Размах Гауссова размытия в пикс
-        
+        static const int BlurSize = 51; // Размах Гауссова размытия в пикс
+
+        struct __classflags {
+        	u8 calibrate : 1;
+        } classflags;
         int cam; // id камеры, с которой снимается видеопоток.
         double t_rrad; // реальный радиус мишени в метрах
         int t_crad; // радиус на камере(берется большая полуось)
         int t_centx, centy; // координаты центра цели на камере
         double dist; // дистанция до мишени в метрах
         CvCapture* capture; // капчур с камеры.
+        struct RGBDrange {
+        	int r, g, b;
+        	int maxdelta;
+        } targetRange;
 
         void init(int cam, double realrad, double dist_coef);
 };

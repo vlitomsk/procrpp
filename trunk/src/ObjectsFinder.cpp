@@ -1,6 +1,14 @@
-#include <ObjectsFinder.h>
+#include "ObjectsFinder.h"
 #include <cstdlib>
-#include <Errors.h>
+#include <exception>
+#include "Errors.h"
+#include <iostream>
+using namespace std;
+
+#define Hate
+
+#define cvFreemage(addr) cvReleaseImageHeader(addr); \
+						  cvReleaseImage(addr);
 
 void ObjectsFinder::init(int cam, double realrad, double dist_coef) {
     this->cam = cam;
@@ -9,8 +17,9 @@ void ObjectsFinder::init(int cam, double realrad, double dist_coef) {
     capture = cvCreateCameraCapture(cam);
     tDistanceCoeff = dist_coef;
     if (!capture) {
-    	errorExit(Errors::ErrorCamNF);
+    	Errors::errorExit(Errors::ErrorCamNF);
     }
+    classflags.calibrate = 0;
 
     refresh();
 }
@@ -30,53 +39,75 @@ ObjectsFinder::~ObjectsFinder() {
 #define max(a, b) ((a) >= (b) ? (a) : (b))
 
 void ObjectsFinder::refresh() {
-    IplImage* g_image = NULL;
-    IplImage* g_gray = NULL;
+    IplImage* img = NULL;
+    IplImage* gray = NULL;
     CvMemStorage* g_storage = NULL;    
     CvSeq* contours = NULL;
 
-    g_image = cvQueryFrame(capture);    
-    cvSmooth(g_image, g_image, CV_GAUSSIAN, GaussBlurSize, GaussBlurSize);
+    img = cvQueryFrame(capture);
+    //img = cvLoadImage("./red.jpg");
+    cvSmooth(img, img, CV_GAUSSIAN, BlurSize, BlurSize);
     if(!g_storage) {
-        g_gray = cvCreateImage( cvGetSize( g_image ), IPL_DEPTH_8U, 1 );
+        gray = cvCreateImage( cvGetSize( img ), IPL_DEPTH_8U, 1 );
         g_storage = cvCreateMemStorage(0);
     } else 
-        cvClearMemStorage( g_storage );
-     
-    cvCvtColor( g_image, g_gray, CV_BGR2GRAY );
-    cvThreshold( g_gray, g_gray, g_thresh, 255, CV_THRESH_BINARY );
-    cvFindContours( g_gray, g_storage, &contours );
-    cvZero( g_gray );
+        cvClearMemStorage( g_storage );  
+
+    if (classflags.calibrate) {
+    	IplImage* chanr = cvCreateImage(cvGetSize(img), IPL_DEPTH_8U, 1);
+    	IplImage* chang = cvCreateImage(cvGetSize(img), IPL_DEPTH_8U, 1);
+    	IplImage* chanb = cvCreateImage(cvGetSize(img), IPL_DEPTH_8U, 1);
+    	cvSplit(img, chanb, chang, chanr, NULL);
+
+    	Hate {
+			cvInRangeS(chanr, cvScalarAll(targetRange.r - targetRange.maxdelta),
+					cvScalarAll(targetRange.r + targetRange.maxdelta), chanr);
+			cvInRangeS(chang, cvScalarAll(targetRange.g - targetRange.maxdelta),
+							cvScalarAll(targetRange.g + targetRange.maxdelta), chang);
+			cvInRangeS(chanb, cvScalarAll(targetRange.b - targetRange.maxdelta),
+							cvScalarAll(targetRange.b + targetRange.maxdelta), chanb);
+			cvAnd(chanr, chang, gray);
+			cvAnd(gray, chanb, gray);
+    	};
+
+    	cvFreemage(&chanr);
+    	cvFreemage(&chang);
+    	cvFreemage(&chanb);
+    } else
+    	cvCvtColor(img, gray, CV_BGR2GRAY);
+
+    cvThreshold( gray, gray, 200, 255, CV_THRESH_BINARY );
+
+    cvFindContours( gray, g_storage, &contours );
+    cvZero( gray );
     CvSeq* c = NULL;
 
     for (c = contours; c != 0; c = c->h_next) {
 
-        if (c->total >= 100) {
+        if (c->total >= 50) {
             CvBox2D ellipse = cvFitEllipse2(c);
             t_crad = (int)max(ellipse.size.width, ellipse.size.height);        
             t_centx = (int)ellipse.center.x;
-            centy = (int)ellipse.center.y;
-            //printf("Center: (%d; %d)\n", (int)ellipse.center.x, (int)ellipse.center.y);
+            centy = (int)ellipse.center.y;    
         }
-    }
-    printf("\n");
+    }    
     if( contours ){
         cvDrawContours(
-                g_gray,
+                gray,
                 contours,
                 cvScalarAll(255),
                 cvScalarAll(255),
                 100 );
     }
 
-    cvShowImage( "Original", g_image );
-    cvShowImage("Contours", g_gray);
-
+    cvShowImage( "Original", img );
+    cvShowImage("Contours", gray);
+    
     cvClearMemStorage(g_storage);
 
-    // Из-за отсутствия этих строк сильно какается память, но с ними происходит Segfault.
-    /*cvReleaseImage(&g_image);
-    cvReleaseImage(&g_gray);*/
+    cvReleaseMemStorage(&g_storage);
+    cvFreemage(&img);
+    cvFreemage(&gray);
 }
 
 double ObjectsFinder::getTargetDistance() {
@@ -99,3 +130,11 @@ IntPoint ObjectsFinder::getTargetCenter() {
     return res;
 }
 
+void ObjectsFinder::calibrate(int targetr, int targetg, int targetb, int maxdelta) {
+	targetRange.r = targetr;
+	targetRange.g = targetg;
+	targetRange.b = targetb;
+	targetRange.maxdelta = maxdelta;
+
+	classflags.calibrate = 1;
+}
