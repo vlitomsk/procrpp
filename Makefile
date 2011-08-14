@@ -1,28 +1,19 @@
-all: clean compile link 
+SRCNAME=driver
+MODEL=atmega8
 
-COMPILER = g++
-LINKER = g++
-
-COMPILER_LIBS = -lopencv_core -lopencv_imgproc -lopencv_highgui
-COMPILER_INCLUDES = -I/usr/local/include/opencv/ -I./include
-COMPILER_OPTIONS = $(COMPILER_INCLUDES) $(COMPILER_LIBS) -O3 -c 
-LINKER_OPTIONS = $(COMPILER_LIBS)
-
-BINARY_NAME = ./main
-BINARY_OPTIONS = 126 30 30 30 0
+all: clean compile buildhex 
 
 compile:
-	$(COMPILER) ./src/main.cpp $(COMPILER_OPTIONS) -o ./lib/main.o
-	$(COMPILER) ./src/ObjectsFinder.cpp $(COMPILER_OPTIONS) -o ./lib/ObjectsFinder.o 
-	$(COMPILER) ./src/Errors.cpp $(COMPILER_OPTIONS) -o ./lib/Errors.o 
-	$(COMPILER) ./src/Navigator.cpp $(COMPILER_OPTIONS) -o ./lib/Navigator.o
+	avr-gcc -Os -O1 -O2 -O3 -mmcu=$(MODEL) -o $(SRCNAME).o $(SRCNAME).c
 
-link:
-	$(LINKER) ./lib/*.o $(LINKER_OPTIONS) -o $(BINARY_NAME)
+buildhex:
+	avr-objcopy -O ihex $(SRCNAME).o $(SRCNAME).hex
+	du $(SRCNAME).hex -b
 
-run: all
-	$(BINARY_NAME) $(BINARY_OPTIONS)
+cp: all
+	cp $(SRCNAME).hex /media/CEDC-A265/
 
 clean:
-	rm ./lib/*.o -f
-	rm $(BINARY_NAME) -f
+	rm ./*.o -f
+	rm ./*.hex -f
+
