@@ -39,7 +39,7 @@ class ObjectsFinder {
         /* Получить координаты луча в камере, пикс */
         IntPoint getLuchCenter();
 
-        /* Калибровать камеру на поиск мишени и луча заданных цветов */
+        /* Калибровать камеру на поиск мишени и заданного цвета с заданным +-ом для него */
         void calibrate(int targetr, int targetg, int targetb, int maxdelta);
 
     private:
@@ -61,6 +61,10 @@ class ObjectsFinder {
         	int r, g, b;
         	int maxdelta;
         } targetRange;
+
+        IplImage *img, *gray;
+        CvMemStorage* g_storage;
+        CvSeq* contours;
 
         void init(int cam, double realrad, double dist_coef);
 };
