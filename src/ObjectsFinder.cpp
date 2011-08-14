@@ -7,9 +7,6 @@ using namespace std;
 
 #define Hate
 
-#define cvFreemage(addr) cvReleaseImageHeader(addr); \
-						  cvReleaseImage(addr);
-
 void ObjectsFinder::init(int cam, double realrad, double dist_coef) {
     this->cam = cam;
     this->t_rrad = realrad;
@@ -20,6 +17,11 @@ void ObjectsFinder::init(int cam, double realrad, double dist_coef) {
     	Errors::errorExit(Errors::ErrorCamNF);
     }
     classflags.calibrate = 0;
+
+    img = NULL;
+    gray = NULL;
+    g_storage = NULL;
+    contours = NULL;
 
     refresh();
 }
@@ -39,18 +41,16 @@ ObjectsFinder::~ObjectsFinder() {
 #define max(a, b) ((a) >= (b) ? (a) : (b))
 
 void ObjectsFinder::refresh() {
-    IplImage* img = NULL;
-    IplImage* gray = NULL;
-    CvMemStorage* g_storage = NULL;    
-    CvSeq* contours = NULL;
-
+	/** ПОПРОБУЙ ТОЛЬКО ЗАРЕЛИЗИТЬ img!!!1!!11 **/
     img = cvQueryFrame(capture);
-    //img = cvLoadImage("./red.jpg");
-    cvSmooth(img, img, CV_GAUSSIAN, BlurSize, BlurSize);
-    if(!g_storage) {
-        gray = cvCreateImage( cvGetSize( img ), IPL_DEPTH_8U, 1 );
+
+    //cvSmooth(img, img, CV_GAUSSIAN, BlurSize, BlurSize);
+
+    gray = cvCreateImage( cvGetSize( img ), IPL_DEPTH_8U, 1 );
+
+    if(!g_storage)
         g_storage = cvCreateMemStorage(0);
-    } else 
+     else
         cvClearMemStorage( g_storage );  
 
     if (classflags.calibrate) {
@@ -70,9 +70,9 @@ void ObjectsFinder::refresh() {
 			cvAnd(gray, chanb, gray);
     	};
 
-    	cvFreemage(&chanr);
-    	cvFreemage(&chang);
-    	cvFreemage(&chanb);
+    	cvReleaseImage(&chanr);
+    	cvReleaseImage(&chang);
+    	cvReleaseImage(&chanb);
     } else
     	cvCvtColor(img, gray, CV_BGR2GRAY);
 
@@ -88,26 +88,25 @@ void ObjectsFinder::refresh() {
             CvBox2D ellipse = cvFitEllipse2(c);
             t_crad = (int)max(ellipse.size.width, ellipse.size.height);        
             t_centx = (int)ellipse.center.x;
-            centy = (int)ellipse.center.y;    
+            centy = (int)ellipse.center.y;
+
         }
     }    
     if( contours ){
         cvDrawContours(
-                gray,
+        		gray,
                 contours,
                 cvScalarAll(255),
                 cvScalarAll(255),
                 100 );
     }
 
+    cvRelease((void**)&contours);
+
     cvShowImage( "Original", img );
     cvShowImage("Contours", gray);
     
-    cvClearMemStorage(g_storage);
-
-    cvReleaseMemStorage(&g_storage);
-    cvFreemage(&img);
-    cvFreemage(&gray);
+    cvReleaseImage(&gray);
 }
 
 double ObjectsFinder::getTargetDistance() {

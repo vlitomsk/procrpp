@@ -26,9 +26,11 @@ int main(int argc, char** argv) {
     ObjectsFinder finder(CAMERAID, 1, 42);
     finder.calibrate(tred, tgreen, tblue, tdelta);
 
+    IntPoint objcenter;
+
     while (true) {
         finder.refresh();
-        IntPoint objcenter = finder.getTargetCenter();
+        objcenter = finder.getTargetCenter();
         printf("Center coordinates: (%d; %d)\n\n", objcenter.x, objcenter.y);
         if (cvWaitKey(1) == 27)
             break;
