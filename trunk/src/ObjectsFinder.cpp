@@ -9,7 +9,7 @@ using namespace std;
 
 void ObjectsFinder::init(int cam, double realrad, double dist_coef) {
     this->cam = cam;
-    this->t_rrad = realrad;
+    this->t_rdim = realrad;
     capture = NULL;
     capture = cvCreateCameraCapture(cam);
     tDistanceCoeff = dist_coef;
@@ -44,7 +44,7 @@ void ObjectsFinder::refresh() {
 	/** ПОПРОБУЙ ТОЛЬКО ЗАРЕЛИЗИТЬ img!!!1!!11 **/
     img = cvQueryFrame(capture);
 
-    //cvSmooth(img, img, CV_GAUSSIAN, BlurSize, BlurSize);
+ //   cvSmooth(img, img, CV_MEDIAN, 21, 21);
 
     gray = cvCreateImage( cvGetSize( img ), IPL_DEPTH_8U, 1 );
 
@@ -86,7 +86,7 @@ void ObjectsFinder::refresh() {
 
         if (c->total >= 50) {
             CvBox2D ellipse = cvFitEllipse2(c);
-            t_crad = (int)max(ellipse.size.width, ellipse.size.height);        
+            t_cdim = (int)max(ellipse.size.width, ellipse.size.height);        
             t_centx = (int)ellipse.center.x;
             centy = (int)ellipse.center.y;
 
@@ -107,14 +107,17 @@ void ObjectsFinder::refresh() {
     cvShowImage("Contours", gray);
     
     cvReleaseImage(&gray);
+
+    cvReleaseImageHeader(&img);
+    cvReleaseImage(&img);
 }
 
 double ObjectsFinder::getTargetDistance() {
-    return t_crad * tDistanceCoeff;
+    return (1 / (double)t_cdim) * tDistanceCoeff;
 }
 
-int ObjectsFinder::getTargetCamRadius() {
-    return t_crad;
+int ObjectsFinder::getTargetCamDiameter() {
+    return t_cdim;
 }
 
 void ObjectsFinder::setTargetDistanceCoef(double c) {

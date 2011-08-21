@@ -23,15 +23,16 @@ int main(int argc, char** argv) {
     cvNamedWindow("Original", CV_WINDOW_AUTOSIZE);
     cvNamedWindow("Contours", CV_WINDOW_AUTOSIZE);
 
-    ObjectsFinder finder(CAMERAID, 1, 42);
+    ObjectsFinder finder(CAMERAID, 0.338, 25.012);
     finder.calibrate(tred, tgreen, tblue, tdelta);
 
     IntPoint objcenter;
 
     while (true) {
         finder.refresh();
-        objcenter = finder.getTargetCenter();
-        printf("Center coordinates: (%d; %d)\n\n", objcenter.x, objcenter.y);
+        //objcenter = finder.getTargetCenter();
+        double distance = finder.getTargetDistance();
+        printf("Distance, m: %f\n", distance);
         if (cvWaitKey(1) == 27)
             break;
     }

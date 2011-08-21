@@ -30,14 +30,11 @@ class ObjectsFinder {
         /* Получить  расстояние до мишени в метрах*/
         double getTargetDistance();
 
-        /* Получить радиус мишени, кажущийся камере, пикс */
-        int getTargetCamRadius();
+        /* Получить диаметр мишени, кажущийся камере, пикс */
+        int getTargetCamDiameter();
 
         /* Получить координаты центра мишени в камере, пикс */
         IntPoint getTargetCenter();
-
-        /* Получить координаты луча в камере, пикс */
-        IntPoint getLuchCenter();
 
         /* Калибровать камеру на поиск мишени и заданного цвета с заданным +-ом для него */
         void calibrate(int targetr, int targetg, int targetb, int maxdelta);
@@ -52,8 +49,8 @@ class ObjectsFinder {
         	u8 calibrate : 1;
         } classflags;
         int cam; // id камеры, с которой снимается видеопоток.
-        double t_rrad; // реальный радиус мишени в метрах
-        int t_crad; // радиус на камере(берется большая полуось)
+        double t_rdim; // реальный радиус мишени в метрах
+        int t_cdim; // радиус на камере(берется большая полуось)
         int t_centx, centy; // координаты центра цели на камере
         double dist; // дистанция до мишени в метрах
         CvCapture* capture; // капчур с камеры.
