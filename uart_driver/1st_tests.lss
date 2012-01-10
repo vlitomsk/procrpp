@@ -1,0 +1,353 @@
+
+1st_tests.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00000126  00000000  00000000  00000094  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000002  00800060  00000126  000001ba  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          0000001e  00800062  00800062  000001bc  2**0
+                  ALLOC
+  3 .debug_aranges 00000020  00000000  00000000  000001bc  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  4 .debug_pubnames 00000073  00000000  00000000  000001dc  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  5 .debug_info   000003b1  00000000  00000000  0000024f  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_abbrev 00000149  00000000  00000000  00000600  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_line   0000026e  00000000  00000000  00000749  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_frame  00000030  00000000  00000000  000009b8  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_str    0000013f  00000000  00000000  000009e8  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_loc    00000080  00000000  00000000  00000b27  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_ranges 000000c0  00000000  00000000  00000ba7  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	12 c0       	rjmp	.+36     	; 0x26 <__ctors_end>
+   2:	2c c0       	rjmp	.+88     	; 0x5c <__bad_interrupt>
+   4:	2b c0       	rjmp	.+86     	; 0x5c <__bad_interrupt>
+   6:	2a c0       	rjmp	.+84     	; 0x5c <__bad_interrupt>
+   8:	29 c0       	rjmp	.+82     	; 0x5c <__bad_interrupt>
+   a:	28 c0       	rjmp	.+80     	; 0x5c <__bad_interrupt>
+   c:	27 c0       	rjmp	.+78     	; 0x5c <__bad_interrupt>
+   e:	26 c0       	rjmp	.+76     	; 0x5c <__bad_interrupt>
+  10:	25 c0       	rjmp	.+74     	; 0x5c <__bad_interrupt>
+  12:	24 c0       	rjmp	.+72     	; 0x5c <__bad_interrupt>
+  14:	23 c0       	rjmp	.+70     	; 0x5c <__bad_interrupt>
+  16:	23 c0       	rjmp	.+70     	; 0x5e <__vector_11>
+  18:	21 c0       	rjmp	.+66     	; 0x5c <__bad_interrupt>
+  1a:	20 c0       	rjmp	.+64     	; 0x5c <__bad_interrupt>
+  1c:	1f c0       	rjmp	.+62     	; 0x5c <__bad_interrupt>
+  1e:	1e c0       	rjmp	.+60     	; 0x5c <__bad_interrupt>
+  20:	1d c0       	rjmp	.+58     	; 0x5c <__bad_interrupt>
+  22:	1c c0       	rjmp	.+56     	; 0x5c <__bad_interrupt>
+  24:	1b c0       	rjmp	.+54     	; 0x5c <__bad_interrupt>
+
+00000026 <__ctors_end>:
+  26:	11 24       	eor	r1, r1
+  28:	1f be       	out	0x3f, r1	; 63
+  2a:	cf e5       	ldi	r28, 0x5F	; 95
+  2c:	d4 e0       	ldi	r29, 0x04	; 4
+  2e:	de bf       	out	0x3e, r29	; 62
+  30:	cd bf       	out	0x3d, r28	; 61
+
+00000032 <__do_copy_data>:
+  32:	10 e0       	ldi	r17, 0x00	; 0
+  34:	a0 e6       	ldi	r26, 0x60	; 96
+  36:	b0 e0       	ldi	r27, 0x00	; 0
+  38:	e6 e2       	ldi	r30, 0x26	; 38
+  3a:	f1 e0       	ldi	r31, 0x01	; 1
+  3c:	02 c0       	rjmp	.+4      	; 0x42 <.do_copy_data_start>
+
+0000003e <.do_copy_data_loop>:
+  3e:	05 90       	lpm	r0, Z+
+  40:	0d 92       	st	X+, r0
+
+00000042 <.do_copy_data_start>:
+  42:	a2 36       	cpi	r26, 0x62	; 98
+  44:	b1 07       	cpc	r27, r17
+  46:	d9 f7       	brne	.-10     	; 0x3e <.do_copy_data_loop>
+
+00000048 <__do_clear_bss>:
+  48:	10 e0       	ldi	r17, 0x00	; 0
+  4a:	a2 e6       	ldi	r26, 0x62	; 98
+  4c:	b0 e0       	ldi	r27, 0x00	; 0
+  4e:	01 c0       	rjmp	.+2      	; 0x52 <.do_clear_bss_start>
+
+00000050 <.do_clear_bss_loop>:
+  50:	1d 92       	st	X+, r1
+
+00000052 <.do_clear_bss_start>:
+  52:	a0 38       	cpi	r26, 0x80	; 128
+  54:	b1 07       	cpc	r27, r17
+  56:	e1 f7       	brne	.-8      	; 0x50 <.do_clear_bss_loop>
+  58:	37 d0       	rcall	.+110    	; 0xc8 <main>
+  5a:	63 c0       	rjmp	.+198    	; 0x122 <_exit>
+
+0000005c <__bad_interrupt>:
+  5c:	d1 cf       	rjmp	.-94     	; 0x0 <__vectors>
+
+0000005e <__vector_11>:
+	MOTOR
+	
+	PORTB &= ~(1<<2);
+	_delay_ms(6);		
+*/
+ISR(USART_RXC_vect) {
+  5e:	1f 92       	push	r1
+  60:	0f 92       	push	r0
+  62:	0f b6       	in	r0, 0x3f	; 63
+  64:	0f 92       	push	r0
+  66:	11 24       	eor	r1, r1
+  68:	8f 93       	push	r24
+  6a:	9f 93       	push	r25
+	val = UART_DATA;
+  6c:	8c b1       	in	r24, 0x0c	; 12
+  6e:	80 93 78 00 	sts	0x0078, r24
+	if(val=='1'){
+  72:	81 33       	cpi	r24, 0x31	; 49
+  74:	41 f4       	brne	.+16     	; 0x86 <__vector_11+0x28>
+		hex = data - 55;
+	return hex;
+}
+
+static void SendChar(uint8_t data) {
+	while (!(UART_STATUS & (1<<UART_TXREADY)));
+  76:	5d 9b       	sbis	0x0b, 5	; 11
+  78:	fe cf       	rjmp	.-4      	; 0x76 <__vector_11+0x18>
+	UART_DATA = data;
+  7a:	83 e5       	ldi	r24, 0x53	; 83
+  7c:	8c b9       	out	0x0c, r24	; 12
+*/
+ISR(USART_RXC_vect) {
+	val = UART_DATA;
+	if(val=='1'){
+		SC('S'); // Right
+		PORTB |= (1<<2);
+  7e:	c2 9a       	sbi	0x18, 2	; 24
+    milliseconds can be achieved.
+ */
+void
+_delay_loop_2(uint16_t __count)
+{
+	__asm__ volatile (
+  80:	80 e6       	ldi	r24, 0x60	; 96
+  82:	99 e0       	ldi	r25, 0x09	; 9
+  84:	13 c0       	rjmp	.+38     	; 0xac <__vector_11+0x4e>
+		_delay_ms(1.2);
+		PORTB &= ~(1<<2);
+		_delay_ms(6);		
+	}
+	if(val=='2') {
+  86:	82 33       	cpi	r24, 0x32	; 50
+  88:	41 f4       	brne	.+16     	; 0x9a <__vector_11+0x3c>
+		hex = data - 55;
+	return hex;
+}
+
+static void SendChar(uint8_t data) {
+	while (!(UART_STATUS & (1<<UART_TXREADY)));
+  8a:	5d 9b       	sbis	0x0b, 5	; 11
+  8c:	fe cf       	rjmp	.-4      	; 0x8a <__vector_11+0x2c>
+	UART_DATA = data;
+  8e:	8d e4       	ldi	r24, 0x4D	; 77
+  90:	8c b9       	out	0x0c, r24	; 12
+		_delay_ms(6);		
+	}
+	if(val=='2') {
+
+		SC('M'); // Left
+		PORTB |= (1<<2);
+  92:	c2 9a       	sbi	0x18, 2	; 24
+  94:	80 ea       	ldi	r24, 0xA0	; 160
+  96:	9f e0       	ldi	r25, 0x0F	; 15
+  98:	09 c0       	rjmp	.+18     	; 0xac <__vector_11+0x4e>
+		_delay_ms(2);
+		PORTB &= ~(1<<2);
+		_delay_ms(6);		
+	 }
+	if(val=='3') {
+  9a:	83 33       	cpi	r24, 0x33	; 51
+  9c:	71 f4       	brne	.+28     	; 0xba <__vector_11+0x5c>
+		hex = data - 55;
+	return hex;
+}
+
+static void SendChar(uint8_t data) {
+	while (!(UART_STATUS & (1<<UART_TXREADY)));
+  9e:	5d 9b       	sbis	0x0b, 5	; 11
+  a0:	fe cf       	rjmp	.-4      	; 0x9e <__vector_11+0x40>
+	UART_DATA = data;
+  a2:	8e e4       	ldi	r24, 0x4E	; 78
+  a4:	8c b9       	out	0x0c, r24	; 12
+		_delay_ms(6);		
+	 }
+	if(val=='3') {
+
+		SC('N'); // F
+		PORTB |= (1<<2);
+  a6:	c2 9a       	sbi	0x18, 2	; 24
+  a8:	80 e8       	ldi	r24, 0x80	; 128
+  aa:	9c e0       	ldi	r25, 0x0C	; 12
+  ac:	01 97       	sbiw	r24, 0x01	; 1
+  ae:	f1 f7       	brne	.-4      	; 0xac <__vector_11+0x4e>
+		_delay_ms(1.6);
+		PORTB &= ~(1<<2);
+  b0:	c2 98       	cbi	0x18, 2	; 24
+  b2:	80 ee       	ldi	r24, 0xE0	; 224
+  b4:	9e e2       	ldi	r25, 0x2E	; 46
+  b6:	01 97       	sbiw	r24, 0x01	; 1
+  b8:	f1 f7       	brne	.-4      	; 0xb6 <__vector_11+0x58>
+		_delay_ms(6);		
+	}
+		
+}
+  ba:	9f 91       	pop	r25
+  bc:	8f 91       	pop	r24
+  be:	0f 90       	pop	r0
+  c0:	0f be       	out	0x3f, r0	; 63
+  c2:	0f 90       	pop	r0
+  c4:	1f 90       	pop	r1
+  c6:	18 95       	reti
+
+000000c8 <main>:
+
+int main(void){
+	/* ***********************************
+	                UART SET UP
+	*************************************/
+	UART_BAUD_HIGH = (UART_CALC_BAUDRATE(BAUDRATE)>>8) & 0xFF; //set baudrate
+  c8:	10 bc       	out	0x20, r1	; 32
+	UART_BAUD_LOW = (UART_CALC_BAUDRATE(BAUDRATE) & 0xFF);
+  ca:	89 e1       	ldi	r24, 0x19	; 25
+  cc:	89 b9       	out	0x09, r24	; 9
+	UART_CTRL = UART_CTRL_DATA; //set enable UART
+  ce:	88 e1       	ldi	r24, 0x18	; 24
+  d0:	8a b9       	out	0x0a, r24	; 10
+	UART_CTRL2 = UART_CTRL2_DATA; //set byte and other features
+  d2:	86 e8       	ldi	r24, 0x86	; 134
+  d4:	80 bd       	out	0x20, r24	; 32
+	UCSRB |= (1 << RXCIE); // enable interrupts
+  d6:	57 9a       	sbi	0x0a, 7	; 10
+	
+	sei(); // allow really all interrupts
+  d8:	78 94       	sei
+	
+	
+	/* **********************************
+	 *               PORTS ASSIGNMENT
+	 ***********************************/
+	DDRB |= (1 << 2); //LED
+  da:	ba 9a       	sbi	0x17, 2	; 23
+	
+	DDRC |= (1 << 2); 
+  dc:	a2 9a       	sbi	0x14, 2	; 20
+	DDRC |= (1 << 4); 
+  de:	a4 9a       	sbi	0x14, 4	; 20
+	return hex;
+}
+
+static void SendChar(uint8_t data) {
+	while (!(UART_STATUS & (1<<UART_TXREADY)));
+	UART_DATA = data;
+  e0:	a3 e5       	ldi	r26, 0x53	; 83
+  e2:	44 e5       	ldi	r20, 0x54	; 84
+  e4:	71 e4       	ldi	r23, 0x41	; 65
+  e6:	62 e5       	ldi	r22, 0x52	; 82
+  e8:	50 e2       	ldi	r21, 0x20	; 32
+  ea:	28 ec       	ldi	r18, 0xC8	; 200
+  ec:	30 e0       	ldi	r19, 0x00	; 0
+		hex = data - 55;
+	return hex;
+}
+
+static void SendChar(uint8_t data) {
+	while (!(UART_STATUS & (1<<UART_TXREADY)));
+  ee:	5d 9b       	sbis	0x0b, 5	; 11
+  f0:	fe cf       	rjmp	.-4      	; 0xee <main+0x26>
+	UART_DATA = data;
+  f2:	ac b9       	out	0x0c, r26	; 12
+		hex = data - 55;
+	return hex;
+}
+
+static void SendChar(uint8_t data) {
+	while (!(UART_STATUS & (1<<UART_TXREADY)));
+  f4:	5d 9b       	sbis	0x0b, 5	; 11
+  f6:	fe cf       	rjmp	.-4      	; 0xf4 <main+0x2c>
+	UART_DATA = data;
+  f8:	4c b9       	out	0x0c, r20	; 12
+		hex = data - 55;
+	return hex;
+}
+
+static void SendChar(uint8_t data) {
+	while (!(UART_STATUS & (1<<UART_TXREADY)));
+  fa:	5d 9b       	sbis	0x0b, 5	; 11
+  fc:	fe cf       	rjmp	.-4      	; 0xfa <main+0x32>
+	UART_DATA = data;
+  fe:	7c b9       	out	0x0c, r23	; 12
+		hex = data - 55;
+	return hex;
+}
+
+static void SendChar(uint8_t data) {
+	while (!(UART_STATUS & (1<<UART_TXREADY)));
+ 100:	5d 9b       	sbis	0x0b, 5	; 11
+ 102:	fe cf       	rjmp	.-4      	; 0x100 <main+0x38>
+	UART_DATA = data;
+ 104:	6c b9       	out	0x0c, r22	; 12
+		hex = data - 55;
+	return hex;
+}
+
+static void SendChar(uint8_t data) {
+	while (!(UART_STATUS & (1<<UART_TXREADY)));
+ 106:	5d 9b       	sbis	0x0b, 5	; 11
+ 108:	fe cf       	rjmp	.-4      	; 0x106 <main+0x3e>
+	UART_DATA = data;
+ 10a:	4c b9       	out	0x0c, r20	; 12
+		hex = data - 55;
+	return hex;
+}
+
+static void SendChar(uint8_t data) {
+	while (!(UART_STATUS & (1<<UART_TXREADY)));
+ 10c:	5d 9b       	sbis	0x0b, 5	; 11
+ 10e:	fe cf       	rjmp	.-4      	; 0x10c <main+0x44>
+	UART_DATA = data;
+ 110:	5c b9       	out	0x0c, r21	; 12
+ 112:	80 e1       	ldi	r24, 0x10	; 16
+ 114:	97 e2       	ldi	r25, 0x27	; 39
+ 116:	f9 01       	movw	r30, r18
+ 118:	31 97       	sbiw	r30, 0x01	; 1
+ 11a:	f1 f7       	brne	.-4      	; 0x118 <main+0x50>
+		__ticks = (uint16_t) (__ms * 10.0);
+		while(__ticks)
+		{
+			// wait 1/10 ms
+			_delay_loop_2(((F_CPU) / 4e3) / 10);
+			__ticks --;
+ 11c:	01 97       	sbiw	r24, 0x01	; 1
+		__ticks = 1;
+	else if (__tmp > 65535)
+	{
+		//	__ticks = requested delay in 1/10 ms
+		__ticks = (uint16_t) (__ms * 10.0);
+		while(__ticks)
+ 11e:	d9 f7       	brne	.-10     	; 0x116 <main+0x4e>
+ 120:	e6 cf       	rjmp	.-52     	; 0xee <main+0x26>
+
+00000122 <_exit>:
+ 122:	f8 94       	cli
+
+00000124 <__stop_program>:
+ 124:	ff cf       	rjmp	.-2      	; 0x124 <__stop_program>
