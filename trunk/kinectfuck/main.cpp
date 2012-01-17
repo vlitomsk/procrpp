@@ -6,8 +6,12 @@
 #include <libfreenect.h>
 #include <math.h>
 #include <unistd.h>
+#include <vector>
+#include <iostream>
 #define u8 unsigned char
 #define u32 unsigned int
+
+using namespace std;
 
 int width = 618, height = 476;
 
@@ -32,7 +36,6 @@ double average(IplImage* arr, int x0, int y0, int w, int h) {
                 sz--;
             } else {
                 s += getarr(arr, i, j);
-
             }
     }
 
@@ -70,9 +73,18 @@ void make_blackbottom(IplImage* img, int x, int h) {
     }
 }
 
-void draw_deltas(IplImage* img) {
+struct otrez {
+    int start, finish;
+};
+
+vector<otrez> draw_deltas(IplImage* img) {
     int last_y0; // последнее значение нижнего пикселя
     int last_dd; // последнее значение крутизны
+
+    vector<otrez> res;
+
+    int last_x1 = -1;
+    int last_x2 = -1;
 
     bool has_seed = false; // выбраны ли начальные last_y0 и last_dd
     for (int i = 0; i < width; ++i) {
@@ -80,14 +92,10 @@ void draw_deltas(IplImage* img) {
 
         int dd = getarr(img, i, height - 1) - getarr(img, i, height - 2); // начальная крутизна
         if (i == 0) { 
-            //            printf("%d\n", (pixa - pixb));
-            //            if (abs(pixa - pixb) > 5)
-            //              printf("AWW! %d %d\n\n", i, j);
             last_dd = dd;
             last_y0 = get_y0(img, 0);
         }
 
-        //                break;
         double averdd = 0;
         int nonwhite = 0;
         int white = 0; 
@@ -97,26 +105,19 @@ void draw_deltas(IplImage* img) {
 
 
             if (pixa == 0xff || pixb == 0xff) { 
-                //                printf("%d %d\n", i, j);
-                //                setarr(img, i, j, 0);
                 white++;
                 planesize++;
                 continue;
             }
 
             averdd += abs(pixa - pixb);
-
+            
             if (!dddnormal(dd, pixa - pixb)) {
-                printf("a{%d}", planesize);
+                //printf("a{%d}", planesize);
                 break;
             } else {
                 planesize++;
                 if (white != 0) {
-                    //        if (abs(getarr(img, i, height - 1) - getarr(img, i, nonwhite)) < 50)
-                    //          continue;
-
-                    //        printf("%d %d", last_y0, get_y0(img, i));
-
                     if (white > 20)
                         break;
                 }
@@ -124,36 +125,33 @@ void draw_deltas(IplImage* img) {
             }
         }
         averdd /= nonwhite;             
-        printf("%f\n", averdd);
+        //printf("%f\n", averdd);
 
         int magic =0;
 
-        if (planesize >= minplanesize && dddnormal(dd, last_dd) && i != 0 && dy0normal(last_y0, get_y0(img, i))) {
-            if (averdd >= 0.05) {
-                last_y0 = get_y0(img, i);
-                make_blackbottom(img, i, nonwhite);
-            }
+        if (planesize >= minplanesize && dddnormal(dd, last_dd) && i != 0 && dy0normal(last_y0, get_y0(img, i)) && averdd >= 0.05) {
+            last_y0 = get_y0(img, i);
+            make_blackbottom(img, i, nonwhite);
+            if (last_x1 < 0) 
+                last_x1 = last_x2 = i;
+            else 
+                last_x2++;
+            
         } else {
             for (int j = height - 1; j >= 1; --j)
                 if ((last_y0 = get_y0(img, i)) != 0xff)
                     break;
+
+            if (last_x1 != -1) {
+                otrez otr = {last_x1, last_x2};
+                res.push_back(otr);
+                last_x1 = -1;
+            }
         }
     }
-}
 
-/*void imgdata_to_array(IplImage* img, u8** arr) {
- *arr = (u8*)malloc(sizeof(u8) * width * height * width);
-/*    for (int y = 0; y < height; ++y) 
-for (int x = 0; x < width; ++x) {}
- *arr[y * width + x] = getarr(img, y, x);
- for(int y=0;y<width;y++)
- {
- for(int x=0;x < height ;x++)
- *arr[y*width + x] = ((u8*)(img->imageData +
- img->widthStep*y))[x];
- } 
- printf("ok\n");
- }*/
+    return res;
+}
 
 void imgdata_to_array(IplImage* img, u8** arr) {
     *arr = (u8*)malloc(sizeof(u8) * img->imageSize);
@@ -162,7 +160,6 @@ void imgdata_to_array(IplImage* img, u8** arr) {
     for (int i = 0; i < img->height; ++i) {
         for (int j = 0; j < img->width; ++j) {
             (*arr)[i*width + j] = getarr(img, j, i);
-//            printf("index = %d\n", i*width+j);
         }
     }
 }   
@@ -242,7 +239,12 @@ imgdata_to_array(tmp2, &data);
 printf("here\n");
 
 cvSetData(image, data, width);
-draw_deltas(image);
+vector<otrez> otr = draw_deltas(image);
+cout << "Отрезочки:\n";
+for (int i = 0; i < otr.size(); ++i) {
+    otrez tmp_struct = otr.at(i);
+    cout << "(" << tmp_struct.start << "; " << tmp_struct.finish << ")\n";
+}
 /*    for (int i = 0; i < 100; ++i)
       for (int j = 0; j < 100; ++j)
       setarr(image, i, j, 0);*/
